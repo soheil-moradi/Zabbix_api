@@ -1,0 +1,375 @@
+=================================================================================
+=		zabbiz api tutorial	   		     		        =
+=		auther = Soheil moradi          			        =
+=	gmail : 19moradi.soheil@gmail.com       			        =
+=================================================================================
+#this document is for whom , who has a basin knowledg about json.
+
+i. zabbix api is working with jsonrpc 2.0
+   it has 4 part :
+	{
+		"jsonrpc":"2.0"
+		"method":"method_name"
+		"params":"parameters_for_output"
+		"auth":"Auth_token"
+		"id":1
+	}
+# we can use this json request with any api test tools(such : postman , curl , ...)
+# your target to test your api is http://your_IP_or_address/zabbix/api_jsonrpc.php
+# in some cases target is http://your_IP_or_address/api_jsonrpc.php
+
+ii. at first to using an api you have to have a and Auth_token
+	for getting an Auth_token -> using login_method :
+		{
+        	   "jsonrpc": "2.0",
+         	   "method": "user.login",
+	           "params": {
+              		 "username": "Admin",
+              		 "password": "zabbix",
+              		 "userData": true
+          	    },
+          	    "id": 1
+      		 }
+	in result you get and Auth_token
+# we can use "userData":true in params to get more data about user
+# remember aftr yot jobs finished use user.logout to avoid security issue
+	user.logout_method:
+		{
+          	 "jsonrpc": "2.0",
+          	 "method": "user.logout",
+          	 "params": [],
+          	 "id": 1,
+        	 "auth": "Auth_token"
+      		 }
+iii. as we say in fist part zabbix api has 4 part which know we
+   understand that one part we change is "method_name" and 
+   "parameters_for_output" which in next part explain each method
+=================================================================================
+#in tutorial we explan some important methods
+=================================================================================
+1. User :
+
+1-1. user.login : Authenticate a user
+ 
+{
+           "jsonrpc": "2.0",
+           "method": "user.login",
+           "params": {
+               "username": "Admin",
+               "password": "zabbix"
+           },
+           "id": 1
+       }
+
+1-2. user.checkAuthentication : Returns information about user
+
+{
+           "jsonrpc": "2.0",
+           "method": "user.checkAuthentication",
+           "params": {
+               "sessionid": "Auth_token"
+           },
+           "id": 1
+       }
+
+1-3. user.creat :
+# roleid    -> 1 = user role , 2 = Admin role , 3 = Super admin role , 4 = Guest role
+# grouid    -> zabbixadmin = 7 , guests = 8 , disable = 9 , ...
+# mediatype -> 1 = Email , 3 = sms , ... ( based on created media )
+# sento     -> email to get trigger info
+
+{
+           "jsonrpc": "2.0",
+           "method": "user.create",
+           "params": {
+               "username": "John",
+               "passwd": "Doe123",
+               "roleid": "5",
+               "usrgrps": [
+                   {
+                       "usrgrpid": "7"
+                   }
+               ],
+               "medias": [
+                   {
+                       "mediatypeid": "1",
+                       "sendto": [
+                           "support@company.com"
+                       ],
+                       "active": 0,
+                       "severity": 63,
+                       "period": "1-7,00:00-24:00"
+                   }
+               ]
+           },
+           "auth": "Auth_token",
+           "id": 1
+       }
+
+1-4. user.delet : delete user(s) by userid that seted in params
+
+{
+           "jsonrpc": "2.0",
+           "method": "user.delete",
+           "params": [
+               "User_ID"
+           ],
+           "auth": "3Auth_token",
+           "id": 1
+       }
+
+1-5. user.get :Retrieve all of the configured users
+# "output": "extend" removing don't make many diffrence
+
+{
+           "jsonrpc": "2.0",
+           "method": "user.get",
+           "params": {
+               "output": "extend"
+           },
+           "auth": "Auth_token",
+           "id": 1
+       }
+
+1-6. user.unblock : unblick disabled user
+
+{
+           "jsonrpc": "2.0",
+           "method": "user.unblock",
+           "params": [
+               "User_ID"
+           ],
+           "auth": "Auth_token",
+           "id": 1
+       }
+
+1-7. user.update :
+#update user paramete that set with based by userid in params
+
+{
+           "jsonrpc": "2.0",
+           "method": "user.update",
+           "params": {
+               "userid": "12",
+               "roleid": "6"
+           },
+           "auth": "Auth_token",
+           "id": 1
+       }
+
+1-8. user.logout : logout from current and diisable and remove the Auth_token
+
+{
+           "jsonrpc": "2.0",
+           "method": "user.logout",
+           "params": [],
+           "id": 1,
+           "auth": "Auth_token"
+       }
+=================================================================================
+2. User group :
+
+2-1. usergroup.create :
+# debug_mode -> disable = 0 , enable = 1
+# gui_access -> 0 = system default authentication
+		1 = internal authentication
+		2 = LDAP authentication
+		3 = disable access to the frontend
+# permission -> access denied     = 0 ( all is for hostgroup or template group )
+		read-only access  = 2
+		read-write access = 3
+
+{
+           "jsonrpc": "2.0",
+           "method": "usergroup.create",
+           "params": {
+               "name": "Operation managers",
+	       "debug_mode": 0,
+	       "gui_access": 0,
+	       "users_status": 0,
+               "hostgroup_rights": {
+                   "id": "2",
+                   "permission": 0
+               },
+           },
+           "auth": "Auth_token",
+           "id": 1
+       }
+
+2-2. usergroup.delete :
+
+{
+           "jsonrpc": "2.0",
+           "method": "usergroup.delete",
+           "params": [
+               "UserGroup_ID"
+           ],
+           "auth": "Auth_token",
+           "id": 1
+       }
+
+2-3. usergroup.get :
+# statu 0 = enabled , 1 = disabled , remove it = all
+
+{
+           "jsonrpc": "2.0",
+           "method": "usergroup.get",
+           "params": {
+               "output": "extend",
+               "status": 0
+           },
+           "auth": "Auth_token"
+           "id": 1
+       }
+
+2-4. usergroup.update :
+# enable a user grupr and set red and wirte for host group(s)
+
+{
+           "jsonrpc": "2.0",
+           "method": "usergroup.update",
+           "params": {
+               "usrgrpid": "17",
+               "users_status": "0",
+               "hostgroup_rights": [
+                   {
+                       "id": "2",
+                       "permission": 3
+                   },
+                   {
+                       "id": "4",
+                       "permission": 3
+                   }
+               ]
+           },
+           "auth": "Auth_token",
+           "id": 1
+       }
+=================================================================================
+3. Host :
+
+3-1. host.creat :
+# type   -> 1 = agent , 2 = SNMP , 3 = IPMI , 4 = JMX
+# useip  -> connect using host DNS name = 0 , connect using host IP address = 2
+# groups -> host group id for hosr to be added on
+
+{
+           "jsonrpc": "2.0",
+           "method": "host.create",
+           "params": {
+               "host": "Linux server",
+               "interfaces": [
+                   {
+                       "type": 1,
+                       "main": 1,
+                       "useip": 1,
+                       "ip": "192.168.3.1",
+                       "dns": "",
+                       "port": "10050"
+                   }
+               ],
+               "groups": [
+                   {
+                       "groupid": "50"
+                   }
+               ],
+               "tags": [
+                   {
+                       "tag": "Host name",
+                       "value": "Linux server"
+                   }
+               ],
+               "templates": [
+                   {
+                       "templateid": "20045"
+                   }
+               ],
+               "inventory_mode": 0,
+               "inventory": {
+                   "macaddress_a": "01234",
+                   "macaddress_b": "56768"
+               }
+           },
+           "auth": "Auth_token",
+           "id": 1
+       }
+3-2. host.delete :
+
+{
+           "jsonrpc": "2.0",
+           "method": "host.delete",
+           "params": [
+               "Host_ID"
+           ],
+           "auth": "Auth_token",
+           "id": 1
+       }
+
+3-3. host.get : retrive all data about host(s)
+# for more info visit below link :
+  https://www.zabbix.com/documentation/current/en/manual/api/reference/host/get
+
+{
+           "jsonrpc": "2.0",
+           "method": "host.get",
+           "params": {
+               "filter": {
+                   "host": [
+                       "Host_Name"
+                   ]
+               }
+           },
+           "auth": "Auth_token",
+           "id": 1
+       }
+
+
+=================================================================================
+4. Host Group:
+
+4-1. hostgroup.create :
+
+{
+           "jsonrpc": "2.0",
+           "method": "hostgroup.create",
+           "params": {
+               "name": "Linux servers"
+           },
+           "auth": "Auth_token",
+           "id": 1
+       } 
+
+4-2. hostgroup.delete :
+
+{
+           "jsonrpc": "2.0",
+           "method": "hostgroup.delete",
+           "params": [
+               "HostGroup_ID"
+           ],
+           "auth": "Auth_token",
+           "id": 1
+       }
+
+4-3. hostgroup.get :
+# we can ignore output and filter to see all Host Group(s)
+
+{
+           "jsonrpc": "2.0",
+           "method": "hostgroup.get",
+           "params": {
+               "output": "extend",
+               "filter": {
+                   "name": [
+                       "HostGroup_NAME"                   ]
+               }
+           },
+           "auth": "Auth_token",
+           "id": 1
+       }
+
+
+================================================================================= 
+5. Template(s) :
+
+5-1. template.creat :
