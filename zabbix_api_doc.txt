@@ -370,6 +370,265 @@ iii. as we say in fist part zabbix api has 4 part which know we
 
 
 ================================================================================= 
-5. Template(s) :
+5. Template group(s) :
 
-5-1. template.creat :
+5-1. templategroup.create :
+
+{
+           "jsonrpc": "2.0",
+           "method": "templategroup.create",
+           "params": {
+               "name": "Templates/Databases"
+           },
+           "auth": "Auth_token",
+           "id": 1
+       }
+
+5-2. templategroup.delete :
+
+{
+           "jsonrpc": "2.0",
+           "method": "templategroup.delete",
+           "params": [
+               "TemplateGrup_ID"
+           ],
+           "auth": "Auth_token",
+           "id": 1
+       }
+
+5-3. templategroup.get :
+# you can ignore params valu to gett all templategroup
+
+{
+           "jsonrpc": "2.0",
+           "method": "templategroup.get",
+           "params": {
+               "output": "extend",
+               "filter": {
+                   "name": [
+                       "Templates/Databases",
+                       "Templates/Modules"
+                   ]
+               }
+           },
+           "auth": "Auth_token",
+           "id": 1
+       }
+
+5-4. templategroup.propagate :
+	Propagate template group permissions to its subgroups
+
+{
+           "jsonrpc": "2.0",
+           "method": "templategroup.propagate",
+           "params": {
+               "groups": [
+                   {
+                       "groupid": "15"
+                   }
+               ],
+               "permissions": true
+           },
+           "auth": "Auth_token",
+           "id": 1
+       }
+
+5-5. templategroup.update :
+# call with templatefrup_id and rename it
+
+{
+           "jsonrpc": "2.0",
+           "method": "templategroup.update",
+           "params": {
+               "groupid": "7",
+               "name": "Templates/Databases"
+           },
+           "auth": "Auth_token",
+           "id": 1
+       }
+
+
+================================================================================= 
+6. Template :
+
+6-1. template.create :
+
+{
+           "jsonrpc": "2.0",
+           "method": "template.create",
+           "params": {
+               "host": "Linux template",
+               "groups": {
+                   "groupid": 1
+               },
+               "templates": [
+                   {
+                       "templateid": "Template_ID"
+                   },
+                   {
+                       "templateid": "Template_ID"
+                   }
+               ],
+               "tags": [
+                   {
+                       "tag": "Host name",
+                       "value": "{HOST.NAME}"
+                   }
+               ]
+           },
+           "auth": "Auth_token",
+           "id": 1
+       }
+
+6-2. template.delete :
+
+{
+           "jsonrpc": "2.0",
+           "method": "template.delete",
+           "params": [
+               "Template(s)_ID"
+           ],
+           "auth": "Auth_token",
+           "id": 1
+       }
+
+6-3. template.get :
+# Retrive all data about 2 template named "Linux" and "windows"
+
+{
+           "jsonrpc": "2.0",
+           "method": "template.get",
+           "params": {
+               "output": "extend",
+               "filter": {
+                   "host": [
+                       "Linux",
+                       "Windows"
+                   ]
+               }
+           },
+           "auth": "Auth_token",
+           "id": 1
+       }
+
+6-4. template.update :
+# call a template with id an do updade (ex :  rename )
+
+{
+           "jsonrpc": "2.0",
+           "method": "template.update",
+           "params": {
+               "templateid": "Template_ID",
+               "name": "Template OS Linux"
+           },
+           "auth": "Auth_token",
+           "id": 1
+       }
+
+
+================================================================================= 
+7. Item(s) :
+
+7-1. item.create :
+# type	     -> 0  - Zabbix agent
+		2  - Zabbix trapper
+		3  - Simple check
+		5  - Zabbix internal
+		7  - Zabbix agent (active)
+		9  - Web item
+		10 - External check
+		11 - Database monitor
+		12 - IPMI agent
+		13 - SSH agent
+		14 - Telnet agent
+		15 - Calculated
+		16 - JMX agent
+		17 - SNMP trap
+		18 - Dependent item
+		19 - HTTP agent
+		20 - SNMP agent
+		21 - Script
+
+# value_type -> 0 - numeric float
+		1 - character
+		2 - log
+		3 - numeric unsigned
+		4 - text
+
+# interface -> Used only for host items
+
+# url -> Only required for http agent item
+
+{
+           "jsonrpc": "2.0",
+           "method": "item.create",
+           "params": {
+               "name": "Free disk space on /home/joe/",
+               "key_": "vfs.fs.size[/home/joe/,free]",
+               "hostid": "Host_ID",
+               "type": 0,
+               "value_type": 3,
+               "interfaceid": "30084",
+               "tags": [
+                   {
+                       "tag": "Disc usage"
+                   },
+                   {
+                       "tag": "Equipment",
+                       "value": "Workstation"
+                   }
+               ],
+               "delay": "30s"
+           },
+           "auth": "Auth_token",
+           "id": 1
+       }
+
+7-2. item.delete :
+
+{
+           "jsonrpc": "2.0",
+           "method": "item.delete",
+           "params": [
+               "Item_ID"
+           ],
+           "auth": "Auth_token",
+           "id": 1
+       }
+
+7-3. item.get :
+
+{
+           "jsonrpc": "2.0",
+           "method": "item.get",
+           "params": {
+               "output": "extend",
+               "hostids": "Host_ID",
+               "with_triggers": true,
+               "search": {
+                   "key_": "system.cpu"
+               },
+               "sortfield": "name"
+           },
+           "auth": "Auth_token",
+           "id": 1
+       }
+
+7-4. item.update :
+# based on your need set params
+# for more ingo visit the link below :
+https://www.zabbix.com/documentation/current/en/manual/api/reference/item/update
+
+{
+           "jsonrpc": "2.0",
+           "method": "item.update",
+           "params": {
+               "itemid": "Item_ID",
+               "status": 0
+           },
+           "auth": "Auth_token",
+           "id": 1
+       }
+
+
+================================================================================= 
